@@ -7,15 +7,15 @@
       "淘气_type": "",
       "老王_val": "2.7",
       "老王_color": "nai",
-      "三年_val": 800,
+      "三年_val": "2.5",
       "三年_color": "fill",
-      "三年_type": "混子",
-      "起源_val": 800,
+      "三年_type": "",
+      "起源_val": "混子",
       "起源_color": "fill",
       "起源_type": "",
-      "cSum": 9451,
+      "cSum": 7851,
       "rate": 1350,
-      "total": 12759
+      "total": 10599
     },
     {
       "segment": "mixed",
@@ -24,15 +24,15 @@
       "三年_type": "群猎",
       "淘气_val": "3.1",
       "淘气_color": "nai",
-      "起源_val": 790,
+      "起源_val": "混子",
       "起源_color": "fill",
-      "起源_type": "混子",
-      "老王_val": 780,
+      "起源_type": "",
+      "老王_val": "2.7",
       "老王_color": "fill",
-      "老王_type": "混子",
-      "cSum": 7171,
+      "老王_type": "",
+      "cSum": 5601,
       "rate": 1650,
-      "total": 11832
+      "total": 9242
     },
     {
       "segment": "mixed",
@@ -44,12 +44,12 @@
       "淘气_val": 700,
       "淘气_color": "fill",
       "淘气_type": "",
-      "老王_val": 700,
+      "老王_val": 800,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 3700,
+      "cSum": 3800,
       "rate": 1350,
-      "total": 4995
+      "total": 5130
     },
     {
       "segment": "mixed",
@@ -58,15 +58,15 @@
       "三年_type": "群猎",
       "起源_val": "3.2",
       "起源_color": "nai",
-      "淘气_val": 700,
+      "淘气_val": "2.51m",
       "淘气_color": "fill",
       "淘气_type": "",
-      "老王_val": 700,
+      "老王_val": "2.5",
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 3866,
+      "cSum": 2466,
       "rate": 1750,
-      "total": 6766
+      "total": 4316
     },
     {
       "segment": "mixed",
@@ -75,15 +75,15 @@
       "淘气_type": "",
       "起源_val": "3.21m",
       "起源_color": "nai",
-      "三年_val": 640,
+      "三年_val": "混子",
       "三年_color": "fill",
       "三年_type": "",
-      "老王_val": 600,
+      "老王_val": "混子",
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 3342,
+      "cSum": 2102,
       "rate": 1850,
-      "total": 6183
+      "total": 3889
     },
     {
       "segment": "mixed",
@@ -92,15 +92,15 @@
       "起源_type": "混子",
       "淘气_val": "3.3",
       "淘气_color": "nai",
-      "三年_val": 600,
+      "三年_val": "混子",
       "三年_color": "fill",
       "三年_type": "",
-      "老王_val": 570,
+      "老王_val": 640,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 3170,
+      "cSum": 2640,
       "rate": 1850,
-      "total": 5865
+      "total": 4884
     },
     {
       "segment": "mixed",
@@ -109,15 +109,15 @@
       "三年_type": "混子",
       "起源_val": "3.3",
       "起源_color": "nai",
-      "淘气_val": 503,
+      "淘气_val": 600,
       "淘气_color": "fill",
       "淘气_type": "",
-      "老王_val": 502,
+      "老王_val": 700,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 2909,
+      "cSum": 3204,
       "rate": 1850,
-      "total": 5382
+      "total": 5927
     },
     {
       "segment": "mixed",
@@ -126,15 +126,15 @@
       "淘气_type": "",
       "起源_val": "3.5",
       "起源_color": "nai",
-      "三年_val": 501,
+      "三年_val": "混子",
       "三年_color": "fill",
       "三年_type": "",
-      "老王_val": 400,
+      "老王_val": 600,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 2705,
+      "cSum": 2404,
       "rate": 2100,
-      "total": 5681
+      "total": 5048
     },
     {
       "segment": "mixed",
@@ -143,15 +143,15 @@
       "淘气_type": "",
       "三年_val": "3.51m",
       "三年_color": "nai",
-      "起源_val": 400,
+      "起源_val": 300,
       "起源_color": "fill",
       "起源_type": "",
-      "老王_val": 400,
+      "老王_val": "混子",
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 2603,
+      "cSum": 2103,
       "rate": 2200,
-      "total": 5727
+      "total": 4627
     },
     {
       "segment": "mixed",
@@ -160,15 +160,15 @@
       "三年_type": "混子",
       "淘气_val": "3.4",
       "淘气_color": "nai",
-      "起源_val": 400,
+      "起源_val": 300,
       "起源_color": "fill",
       "起源_type": "",
-      "老王_val": 300,
+      "老王_val": 780,
       "老王_color": "fill",
-      "老王_type": "混子",
-      "cSum": 2406,
+      "老王_type": "",
+      "cSum": 2786,
       "rate": 2000,
-      "total": 4812
+      "total": 5572
     },
     {
       "segment": "mixed",
@@ -180,12 +180,12 @@
       "淘气_val": 300,
       "淘气_color": "fill",
       "淘气_type": "",
-      "老王_val": 300,
+      "老王_val": "混子",
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 2305,
+      "cSum": 2005,
       "rate": 2450,
-      "total": 5647
+      "total": 4912
     },
     {
       "segment": "mixed",
@@ -194,15 +194,15 @@
       "起源_type": "",
       "淘气_val": "3.8",
       "淘气_color": "nai",
-      "三年_val": 300,
+      "三年_val": "混子",
       "三年_color": "fill",
       "三年_type": "",
-      "老王_val": 300,
+      "老王_val": "混子",
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 2200,
+      "cSum": 1600,
       "rate": 2450,
-      "total": 5390
+      "total": 3920
     },
     {
       "segment": "mixed",
@@ -211,15 +211,15 @@
       "起源_type": "",
       "三年_val": "3.8",
       "三年_color": "nai",
-      "淘气_val": 300,
+      "淘气_val": 502,
       "淘气_color": "fill",
       "淘气_type": "",
-      "老王_val": 300,
+      "老王_val": "混子",
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 2200,
+      "cSum": 2102,
       "rate": 2450,
-      "total": 5390
+      "total": 5150
     },
     {
       "segment": "mixed",
@@ -228,15 +228,15 @@
       "三年_type": "混子",
       "起源_val": "3.8",
       "起源_color": "nai",
-      "淘气_val": 300,
+      "淘气_val": 503,
       "淘气_color": "fill",
       "淘气_type": "",
-      "老王_val": "2.5",
+      "老王_val": 700,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 1807,
+      "cSum": 2710,
       "rate": 2450,
-      "total": 4427
+      "total": 6640
     },
     {
       "segment": "mixed",
@@ -245,15 +245,15 @@
       "三年_type": "群猎",
       "老王_val": "3.81m",
       "老王_color": "nai",
-      "淘气_val": "2.5",
+      "淘气_val": 300,
       "淘气_color": "fill",
       "淘气_type": "",
-      "起源_val": "2.51m",
+      "起源_val": 300,
       "起源_color": "fill",
       "起源_type": "",
-      "cSum": 1683,
+      "cSum": 2283,
       "rate": 2550,
-      "total": 4292
+      "total": 5822
     },
     {
       "segment": "mixed",
@@ -262,15 +262,15 @@
       "起源_type": "",
       "淘气_val": "3.9",
       "淘气_color": "nai",
-      "三年_val": "2.7",
+      "三年_val": "混子",
       "三年_color": "fill",
       "三年_type": "",
-      "老王_val": "群猎",
+      "老王_val": "混子",
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 1680,
+      "cSum": 1500,
       "rate": 2600,
-      "total": 4368
+      "total": 3900
     },
     {
       "segment": "mixed",
@@ -279,15 +279,15 @@
       "老王_type": "混子",
       "起源_val": "4.0",
       "起源_color": "nai",
-      "三年_val": "群猎",
+      "三年_val": "混子",
       "三年_color": "fill",
       "三年_type": "",
-      "淘气_val": "群猎",
+      "淘气_val": 501,
       "淘气_color": "fill",
       "淘气_type": "",
-      "cSum": 1680,
+      "cSum": 2001,
       "rate": 2700,
-      "total": 4536
+      "total": 5403
     },
     {
       "segment": "mixed",
@@ -296,15 +296,15 @@
       "三年_type": "混子",
       "淘气_val": "4.0",
       "淘气_color": "nai",
-      "起源_val": "混子",
+      "起源_val": 300,
       "起源_color": "fill",
       "起源_type": "",
-      "老王_val": "混子",
+      "老王_val": 570,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 1408,
+      "cSum": 2278,
       "rate": 2700,
-      "total": 3802
+      "total": 6151
     },
     {
       "segment": "mixed",
@@ -313,15 +313,15 @@
       "淘气_type": "",
       "三年_val": "4.0",
       "三年_color": "nai",
-      "起源_val": "混子",
+      "起源_val": 400,
       "起源_color": "fill",
       "起源_type": "",
-      "老王_val": "混子",
+      "老王_val": 790,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 1200,
+      "cSum": 2390,
       "rate": 2700,
-      "total": 3240
+      "total": 6453
     },
     {
       "segment": "mixed",
@@ -330,15 +330,15 @@
       "老王_type": "混子",
       "淘气_val": "4.0",
       "淘气_color": "nai",
-      "三年_val": "混子",
+      "三年_val": "群猎",
       "三年_color": "fill",
-      "三年_type": "",
-      "起源_val": "混子",
+      "三年_type": "群猎",
+      "起源_val": 300,
       "起源_color": "fill",
       "起源_type": "",
-      "cSum": 1200,
+      "cSum": 1644,
       "rate": 2700,
-      "total": 3240
+      "total": 4439
     },
     {
       "segment": "mixed",
@@ -347,15 +347,15 @@
       "淘气_type": "",
       "三年_val": "4.1",
       "三年_color": "nai",
-      "起源_val": "混子",
+      "起源_val": 400,
       "起源_color": "fill",
       "起源_type": "",
-      "老王_val": "混子",
+      "老王_val": 800,
       "老王_color": "fill",
       "老王_type": "",
-      "cSum": 1002,
+      "cSum": 2202,
       "rate": 2800,
-      "total": 2806
+      "total": 6166
     },
     {
       "segment": "mixed",
@@ -364,15 +364,15 @@
       "淘气_type": "",
       "老王_val": "4.2",
       "老王_color": "nai",
-      "三年_val": "混子",
+      "三年_val": "群猎",
       "三年_color": "fill",
-      "三年_type": "",
-      "起源_val": "混子",
+      "三年_type": "群猎",
+      "起源_val": 400,
       "起源_color": "fill",
       "起源_type": "",
-      "cSum": 1001,
+      "cSum": 1521,
       "rate": 2900,
-      "total": 2903
+      "total": 4411
     },
     {
       "segment": "mixed",
@@ -381,15 +381,15 @@
       "老王_type": "混子",
       "淘气_val": "4.3",
       "淘气_color": "nai",
-      "三年_val": "混子",
+      "三年_val": "群猎",
       "三年_color": "fill",
-      "三年_type": "",
-      "起源_val": "混子",
+      "三年_type": "群猎",
+      "起源_val": 400,
       "起源_color": "fill",
       "起源_type": "",
-      "cSum": 910,
+      "cSum": 1419,
       "rate": 3000,
-      "total": 2730
+      "total": 4257
     },
     {
       "segment": "mixed",
@@ -398,15 +398,15 @@
       "老王_type": "",
       "淘气_val": "4.31m",
       "淘气_color": "nai",
-      "三年_val": "混子",
+      "三年_val": 300,
       "三年_color": "fill",
       "三年_type": "",
-      "起源_val": "混子",
+      "起源_val": 700,
       "起源_color": "fill",
       "起源_type": "",
-      "cSum": 880,
+      "cSum": 1880,
       "rate": 3100,
-      "total": 2728
+      "total": 5828
     }
   ],
   "meta": {

@@ -161,15 +161,18 @@ function generateTableData(roles, rateMap) {
     if (!swapped) break
   }
 
-  // ---- 4. 填充物 ----
+  // ---- 4. 按角色构建填充池（每列值只能在本列填充） ----
   const naiExtras = naiItems.length > 24
     ? naiItems.slice(0, naiItems.length - 24)
     : []
-  const extras = [
-    ...cItems.slice(24).map(v => ({ name: v.name, val: v.val, type: v.type })),
-    ...naiExtras.map(v => ({ name: v.name, val: v.val })),
-    ...hunItems.map(v => ({ name: v.name, val: v.val })),
-  ]
+  const charPools = {}
+  for (const n of names) {
+    charPools[n] = {
+      c:   cItems.slice(24).filter(f => f.name === n).sort((a,b) => b.val - a.val),
+      nai: naiExtras.filter(f => f.name === n),
+      hun: hunItems.filter(f => f.name === n),
+    }
+  }
 
   // ---- 5. 伤害计算辅助 ----
 
@@ -178,64 +181,110 @@ function generateTableData(roles, rateMap) {
     return rateMap.get(key) || 0
   }
 
-  // ---- 6. 构建 24 行 ----
-  const rows = []
-  for (let i = 0; i < 24; i++) {
-    const row = { segment: 'mixed' }
-    const filled = {}
-
-    // 主 c
-    row[`${mainC[i].name}_val`] = mainC[i].val
-    row[`${mainC[i].name}_color`] = 'c'
-    row[`${mainC[i].name}_type`] = mainC[i].type
-    filled[mainC[i].name] = true
-
-    // 主奶
-    row[`${pairedNai[i].name}_val`] = pairedNai[i].val
-    row[`${pairedNai[i].name}_color`] = 'nai'
-    filled[pairedNai[i].name] = true
-
-    // 填充
-    for (const n of names) {
-      if (!filled[n]) {
-        const ext = extras.length > 0 ? extras.shift() : null
-        if (ext) {
-          row[`${n}_val`] = ext.val
-          row[`${n}_color`] = 'fill'
-          row[`${n}_type`] = ext.type || ''
-        } else {
-          row[`${n}_val`] = ''
-          row[`${n}_color`] = 'empty'
-          row[`${n}_type`] = ''
-        }
-      }
-    }
-
-    // ---- 计算伤害 ----
-    // 规则：所有 c 值（数字）全部计入
-    //       行内有群猎（字符串标记） → 主c×1.12
-    //       混子字符串本身非数值，不会被计入
+  /** 计算单行伤害（用于填充前预评估） */
+  function calcRowDamage(row) {
     const hasQunlie = Object.values(row).some(v => v === '群猎')
-    let cSumEffective = 0
+    let cSum = 0
     for (const n of names) {
       const v = row[`${n}_val`]
       if (typeof v === 'number') {
-        const isMainC = row[`${n}_color`] === 'c'
-        cSumEffective += isMainC && hasQunlie ? Math.round(v * 1.12) : v
+        cSum += row[`${n}_color`] === 'c' && hasQunlie ? Math.round(v * 1.12) : v
       }
     }
+    const naiCol = Object.keys(row).find(k => k.endsWith('_color') && row[k] === 'nai')
+    const naiName = naiCol ? naiCol.replace('_color', '') : ''
+    const rate = getRate(row[`${naiName}_val`] || '')
+    return { cSum, rate, total: Math.round(cSum * rate / 1000) }
+  }
 
-    const naiVal = row[`${pairedNai[i].name}_val`]
-    const rate = getRate(naiVal)
-
-    // total = c有效总和 × 奶rate / 1000
-    const damage = Math.round(cSumEffective * rate / 1000)
-
-    row.cSum = cSumEffective
-    row.rate = rate
-    row.total = damage
-
+  // ---- 6. 构建 24 行（基础：主c + 主奶） ----
+  const rows = []
+  for (let i = 0; i < 24; i++) {
+    const row = { segment: 'mixed' }
+    row[`${mainC[i].name}_val`] = mainC[i].val
+    row[`${mainC[i].name}_color`] = 'c'
+    row[`${mainC[i].name}_type`] = mainC[i].type
+    row[`${pairedNai[i].name}_val`] = pairedNai[i].val
+    row[`${pairedNai[i].name}_color`] = 'nai'
     rows.push(row)
+  }
+
+  // ---- 7. 按列填充（每列值只能在本列中填充） ----
+  // 策略：低伤害行 → 给 c 值 / 群猎；高伤害行 → 给混子/奶值
+  // 先按基础伤害排序，从低到高逐行填充，每行空位用对应角色池的填充
+
+  for (const row of rows) {
+    row._slots = names.filter(n => row[`${n}_val`] === undefined || row[`${n}_val`] === '')
+    row._dmg = calcRowDamage(row).total
+  }
+
+  // 按伤害升序处理（低→高）
+  const sortedRows = [...rows].sort((a, b) => a._dmg - b._dmg)
+
+  for (const row of sortedRows) {
+    // 该行的每个空位，从对应角色池取最优填充
+    for (const slot of row._slots) {
+      const pool = charPools[slot]
+      if (!pool) continue
+
+      // 优先级：c(提升) > hun中群猎(触发×1.12) > hun中混子/奶值(无影响)
+      let fill = null
+      if (pool.c.length > 0) {
+        fill = { val: pool.c[0].val, type: '', color: 'fill' }
+        pool.c.shift()
+      } else if (pool.hun.some(h => h.val === '群猎')) {
+        const idx = pool.hun.findIndex(h => h.val === '群猎')
+        pool.hun.splice(idx, 1)
+        fill = { val: '群猎', type: '群猎', color: 'fill' }
+      } else if (pool.hun.length > 0) {
+        fill = { val: pool.hun[0].val, type: '', color: 'fill' }
+        pool.hun.shift()
+      } else if (pool.nai.length > 0) {
+        fill = { val: pool.nai[0].val, type: '', color: 'fill' }
+        pool.nai.shift()
+      }
+
+      if (fill) {
+        row[`${slot}_val`] = fill.val
+        row[`${slot}_color`] = fill.color
+        row[`${slot}_type`] = fill.type || ''
+        row._dmg = calcRowDamage(row).total
+      }
+    }
+    delete row._slots
+    delete row._dmg
+  }
+
+  // 兜底：若有空位未填，从所有角色剩余池中取，确保无空值
+  const allRemaining = []
+  for (const n of names) {
+    const p = charPools[n]
+    if (!p) continue
+    for (const item of p.c)   allRemaining.push({ name: n, val: item.val, type: item.type || '' })
+    for (const item of p.nai) allRemaining.push({ name: n, val: item.val, type: '' })
+    for (const item of p.hun) allRemaining.push({ name: n, val: item.val, type: '' })
+  }
+  for (const row of rows) {
+    for (const n of names) {
+      if ((row[`${n}_val`] === undefined || row[`${n}_val`] === '') && allRemaining.length > 0) {
+        const fill = allRemaining.shift()
+        row[`${n}_val`] = fill.val
+        row[`${n}_color`] = 'fill'
+        row[`${n}_type`] = fill.type || ''
+      } else if (row[`${n}_val`] === undefined || row[`${n}_val`] === '') {
+        row[`${n}_val`] = ''
+        row[`${n}_color`] = 'empty'
+        row[`${n}_type`] = ''
+      }
+    }
+  }
+
+  // ---- 8. 最终伤害计算 ----
+  for (const row of rows) {
+    const { cSum, rate, total } = calcRowDamage(row)
+    row.cSum = cSum
+    row.rate = rate
+    row.total = total
   }
 
   return {

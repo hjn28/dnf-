@@ -3,9 +3,9 @@
     <NavBar />
 
     <div class="main-content">
-      <div class="page-header">
+      <!-- <div class="page-header">
         <h1 class="page-title">伤害对照表</h1>
-      </div>
+      </div> -->
 
       <div class="content-layout">
         <!-- 左侧：颜色图例 -->
@@ -88,13 +88,13 @@
               :data="tableData"
               border
               stripe
-              size="large"
+              size="small"
               class="data-table"
               max-height="700"
             >
-              <el-table-column label="序号" type="index" width="60" align="center" fixed />
+              <el-table-column label="#" type="index" width="40" align="center" fixed />
 
-              <el-table-column v-for="name in characterOrder" :key="name" :label="name" align="center" min-width="130">
+              <el-table-column v-for="name in characterOrder" :key="name" :label="name" align="center" width="110">
                 <template #default="{ row }">
                   <span v-if="row[`${name}_val`] !== ''" class="data-cell"
                     :class="`bg-${row[`${name}_color`]}`">
@@ -108,7 +108,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column label="伤害对照表（千亿）" width="200" align="right" sortable prop="total" fixed="right">
+              <el-table-column label="伤害（千亿）" width="130" align="right" sortable prop="total" fixed="right">
                 <template #default="{ row }">
                   <span class="cell-total" :class="{ 'total-zero': row.total === 0 }">
                     {{ row.total > 0 ? row.total.toLocaleString() : '—' }}
@@ -172,16 +172,17 @@ const characterOrder = ['三年', '淘气', '起源', '老王']
 .order-arrow { font-size: 10px; }
 
 .table-area { flex: 1; min-width: 0; }
-.data-table :deep(.el-table__header th) { font-weight: 700; background: var(--el-fill-color-lighter); font-size: 14px; }
+.data-table :deep(.el-table__header th) { font-weight: 700; background: var(--el-fill-color-lighter); font-size: 12px; padding: 4px 2px !important; }
 
-.data-cell { display: inline-block; padding: 3px 12px; border-radius: 6px; line-height: 1.6; }
+.data-cell { display: inline-block; padding: 2px 8px; border-radius: 4px; line-height: 1.4; }
 .bg-c { background: rgba(64, 158, 255, 0.12); }
 .bg-nai { background: rgba(212, 137, 10, 0.12); }
 .bg-qun { background: rgba(103, 194, 58, 0.12); }
 .bg-hun { background: rgba(139, 92, 246, 0.12); }
 .bg-fill { background: rgba(144, 147, 153, 0.08); }
-.data-val { font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; }
+.data-val { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
 .color-fill { color: #909399; }
+.data-table :deep(.el-table__body td) { padding: 4px 2px !important; }
 .color-c { color: var(--el-color-primary); font-size: 15px; font-weight: 800; }
 .color-nai { color: #d4890a; }
 .color-nai-m { color: var(--el-color-danger); font-weight: 700; }
