@@ -1,0 +1,391 @@
+{
+  "updatedAt": "2026-06-27T14:55:51.626Z",
+  "multiplierCount": 23,
+  "characters": [
+    {
+      "name": "三年",
+      "rows": [
+        {
+          "damage": 5001,
+          "multiplier": 4.1,
+          "rate": 2800,
+          "op": "+",
+          "result": 14002800
+        },
+        {
+          "damage": 2202,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "+",
+          "result": 5945400
+        },
+        {
+          "damage": 1503,
+          "multiplier": 3.8,
+          "rate": 2450,
+          "op": "+",
+          "result": 3682350
+        },
+        {
+          "damage": 1904,
+          "multiplier": 3.51,
+          "rate": 2200,
+          "op": "x",
+          "result": 4188800
+        },
+        {
+          "damage": 1705,
+          "multiplier": 2.7,
+          "rate": 1350,
+          "op": "x",
+          "result": 2301750
+        },
+        {
+          "damage": 1706,
+          "multiplier": 2.5,
+          "rate": 1150,
+          "op": "x",
+          "result": 1961900
+        },
+        {
+          "damage": 1507,
+          "multiplier": 3.51,
+          "rate": 2200,
+          "op": "x",
+          "result": 3315400
+        },
+        {
+          "damage": 1408,
+          "multiplier": 2.7,
+          "rate": 1350,
+          "op": "x",
+          "result": 1900800
+        },
+        {
+          "damage": 300,
+          "multiplier": 2.5,
+          "rate": 1150,
+          "op": "x",
+          "result": 345000
+        }
+      ],
+      "totalDamage": 37644200,
+      "totalRows": 9
+    },
+    {
+      "name": "淘气",
+      "rows": [
+        {
+          "damage": 7001,
+          "multiplier": 4.31,
+          "rate": 3100,
+          "op": "x",
+          "result": 21703100
+        },
+        {
+          "damage": 2002,
+          "multiplier": 4.3,
+          "rate": 3000,
+          "op": "x",
+          "result": 6006000
+        },
+        {
+          "damage": 1803,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "x",
+          "result": 4868100
+        },
+        {
+          "damage": 1804,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "x",
+          "result": 4870800
+        },
+        {
+          "damage": 1300,
+          "multiplier": 3.9,
+          "rate": 2600,
+          "op": "x",
+          "result": 3380000
+        },
+        {
+          "damage": 1000,
+          "multiplier": 3.8,
+          "rate": 2450,
+          "op": "x",
+          "result": 2450000
+        },
+        {
+          "damage": 900,
+          "multiplier": 3.4,
+          "rate": 2000,
+          "op": "x",
+          "result": 1800000
+        },
+        {
+          "damage": 700,
+          "multiplier": 3.3,
+          "rate": 1850,
+          "op": "x",
+          "result": 1295000
+        },
+        {
+          "damage": 600,
+          "multiplier": 3.1,
+          "rate": 1650,
+          "op": "x",
+          "result": 990000
+        },
+        {
+          "damage": 500,
+          "multiplier": 2.81,
+          "rate": 1600,
+          "op": "x",
+          "result": 800000
+        },
+        {
+          "damage": 400,
+          "multiplier": 4.31,
+          "rate": 3100,
+          "op": "x",
+          "result": 1240000
+        },
+        {
+          "damage": 400,
+          "multiplier": 4.3,
+          "rate": 3000,
+          "op": "x",
+          "result": 1200000
+        },
+        {
+          "damage": 300,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "x",
+          "result": 810000
+        },
+        {
+          "damage": 300,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "x",
+          "result": 810000
+        }
+      ],
+      "totalDamage": 52223000,
+      "totalRows": 14
+    },
+    {
+      "name": "起源",
+      "rows": [
+        {
+          "damage": 2300,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "x",
+          "result": 6210000
+        },
+        {
+          "damage": 2000,
+          "multiplier": 3.8,
+          "rate": 2450,
+          "op": "x",
+          "result": 4900000
+        },
+        {
+          "damage": 1600,
+          "multiplier": 3.8,
+          "rate": 2450,
+          "op": "x",
+          "result": 3920000
+        },
+        {
+          "damage": 1600,
+          "multiplier": 3.5,
+          "rate": 2100,
+          "op": "x",
+          "result": 3360000
+        },
+        {
+          "damage": 1500,
+          "multiplier": 3.3,
+          "rate": 1850,
+          "op": "x",
+          "result": 2775000
+        },
+        {
+          "damage": 700,
+          "multiplier": 3.21,
+          "rate": 1850,
+          "op": "x",
+          "result": 1295000
+        },
+        {
+          "damage": 400,
+          "multiplier": 3.2,
+          "rate": 1750,
+          "op": "x",
+          "result": 700000
+        },
+        {
+          "damage": 400,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "x",
+          "result": 1080000
+        },
+        {
+          "damage": 400,
+          "multiplier": 3.8,
+          "rate": 2450,
+          "op": "x",
+          "result": 980000
+        },
+        {
+          "damage": 400,
+          "multiplier": 3.8,
+          "rate": 2450,
+          "op": "x",
+          "result": 980000
+        },
+        {
+          "damage": 300,
+          "multiplier": 3.5,
+          "rate": 2100,
+          "op": "x",
+          "result": 630000
+        },
+        {
+          "damage": 300,
+          "multiplier": 3.3,
+          "rate": 1850,
+          "op": "x",
+          "result": 555000
+        },
+        {
+          "damage": 300,
+          "multiplier": 3.21,
+          "rate": 1850,
+          "op": "x",
+          "result": 555000
+        },
+        {
+          "damage": 300,
+          "multiplier": 3.2,
+          "rate": 1750,
+          "op": "x",
+          "result": 525000
+        },
+        {
+          "damage": 300,
+          "multiplier": 4,
+          "rate": 2700,
+          "op": "x",
+          "result": 810000
+        }
+      ],
+      "totalDamage": 29275000,
+      "totalRows": 15
+    },
+    {
+      "name": "老王",
+      "rows": [
+        {
+          "damage": 1500,
+          "multiplier": 4.2,
+          "rate": 2900,
+          "op": "x",
+          "result": 4350000
+        },
+        {
+          "damage": 1200,
+          "multiplier": 3.81,
+          "rate": 2550,
+          "op": "x",
+          "result": 3060000
+        },
+        {
+          "damage": 910,
+          "multiplier": 2.7,
+          "rate": 1350,
+          "op": "x",
+          "result": 1228500
+        },
+        {
+          "damage": 790,
+          "multiplier": 2.7,
+          "rate": 1350,
+          "op": "x",
+          "result": 1066500
+        },
+        {
+          "damage": 780,
+          "multiplier": 2.5,
+          "rate": 1150,
+          "op": "x",
+          "result": 897000
+        },
+        {
+          "damage": 800,
+          "multiplier": 4.2,
+          "rate": 2900,
+          "op": "x",
+          "result": 2320000
+        },
+        {
+          "damage": 700,
+          "multiplier": 3.81,
+          "rate": 2550,
+          "op": "x",
+          "result": 1785000
+        },
+        {
+          "damage": 700,
+          "multiplier": 2.7,
+          "rate": 1350,
+          "op": "x",
+          "result": 945000
+        },
+        {
+          "damage": 600,
+          "multiplier": 2.7,
+          "rate": 1350,
+          "op": "x",
+          "result": 810000
+        },
+        {
+          "damage": 880,
+          "multiplier": 2.5,
+          "rate": 1150,
+          "op": "x",
+          "result": 1012000
+        },
+        {
+          "damage": 570,
+          "multiplier": 4.2,
+          "rate": 2900,
+          "op": "x",
+          "result": 1653000
+        },
+        {
+          "damage": 800,
+          "multiplier": 3.81,
+          "rate": 2550,
+          "op": "x",
+          "result": 2040000
+        },
+        {
+          "damage": 640,
+          "multiplier": 2.7,
+          "rate": 1350,
+          "op": "x",
+          "result": 864000
+        }
+      ],
+      "totalDamage": 22031000,
+      "totalRows": 13
+    }
+  ]
+}
