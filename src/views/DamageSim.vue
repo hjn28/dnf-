@@ -28,6 +28,10 @@
               <span class="legend-dot dot-hun"></span>
               <span>混子</span>
             </div>
+            <div class="legend-item">
+              <span class="legend-dot dot-sun"></span>
+              <span>太阳奶</span>
+            </div>
             <el-divider style="margin: 8px 0" />
             <div class="legend-item">
               <el-tag size="small" type="danger" effect="plain">m</el-tag>
@@ -164,6 +168,7 @@ const characterOrder = ['三年', '淘气', '起源', '老王']
 .dot-nai { background: #d4890a; }
 .dot-qun { background: var(--el-color-success); }
 .dot-hun { background: #8b5cf6; }
+.dot-sun { background: #16a34a; }
 .dot-fill { background: #909399; }
 .legend-order { margin-top: 4px; }
 .order-title { font-size: 12px; font-weight: 700; color: var(--el-text-color-secondary); margin-bottom: 6px; }
@@ -178,6 +183,7 @@ const characterOrder = ['三年', '淘气', '起源', '老王']
 .bg-nai { background: rgba(212, 137, 10, 0.12); }
 .bg-qun { background: rgba(103, 194, 58, 0.12); }
 .bg-hun { background: rgba(139, 92, 246, 0.12); }
+.bg-sun { background: rgba(22, 163, 74, 0.12); }
 .bg-fill { background: rgba(144, 147, 153, 0.08); }
 .data-val { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
 .color-fill { color: #909399; }
@@ -188,6 +194,7 @@ const characterOrder = ['三年', '淘气', '起源', '老王']
 .color-nai-m { color: var(--el-color-danger); font-weight: 700; }
 .color-qun { color: var(--el-color-success); }
 .color-hun { color: #8b5cf6; }
+.color-sun { color: #16a34a; }
 .val-empty { color: var(--el-text-color-placeholder); font-weight: 400; }
 
 .cell-total { font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: var(--el-text-color-secondary); }
