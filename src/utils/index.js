@@ -445,7 +445,7 @@ export class ColumnBalancer {
             row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
           }
 
-          // A2: c（从最小到最大找第一个≥5000的c，直接消耗）
+          // A2: c（从最小到最大找第一个≥5000的c）
           if (!reached && pool.c.length > 0) {
             const largest = pool.c[pool.c.length - 1]
             row[`${slot}_val`] = largest.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = largest.type || ''
@@ -481,7 +481,7 @@ export class ColumnBalancer {
         }
 
         if (reached) {
-          // 单填充达标 → 剩余空位填混子 → 太阳奶 → 最小c
+          // 剩余空位填混子 → 太阳奶 → 最小c
           for (const slot of emptySlots) {
             if (row[`${slot}_val`] && row[`${slot}_val`] !== '') continue
             const pool = pools[slot]
@@ -496,6 +496,34 @@ export class ColumnBalancer {
               const c = pool.c.shift()
               row[`${slot}_val`] = c.val
               row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = c.type || ''
+            }
+          }
+
+          // ── 双c收紧：两c都填了且总伤>5500，从池中换更小的c ──
+          const cSlots = this.names.filter(n =>
+            row[`${n}_color`] === 'fill' && typeof row[`${n}_val`] === 'number')
+          if (cSlots.length >= 2) {
+            const curTot = this._calcRow(row).total
+            if (curTot > 5500) {
+              for (const cs of cSlots) {
+                const pool = pools[cs]
+                const curVal = row[`${cs}_val`]
+                // 在池中找更小的c：从最小到最大试，第一个能让总伤≥5000的就是最优
+                for (let ci = 0; ci < pool.c.length; ci++) {
+                  const smaller = pool.c[ci]
+                  if (smaller.val >= curVal) break // 池中c已不小于当前值
+                  row[`${cs}_val`] = smaller.val
+                  if (this._calcRow(row).total >= THRESHOLD) {
+                    // 换成功：把当前c还回池，消耗更小的c
+                    pool.c.splice(ci, 1)
+                    pool.c.push({ name: cs, val: curVal, type: row[`${cs}_type`] || '' })
+                    pool.c.sort((a, b) => a.val - b.val)
+                    row[`${cs}_type`] = smaller.type || ''
+                    break
+                  }
+                  row[`${cs}_val`] = curVal // 恢复
+                }
+              }
             }
           }
           continue
