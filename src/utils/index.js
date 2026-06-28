@@ -375,8 +375,8 @@ export class ColumnBalancer {
     const remaining = this.gatherOthers(24, 24)
 
     // ==================== 填充逻辑 ====================
-    // 规则：高伤(≥5000)→混子 | 低伤(<5000)→大c/群猎/太阳奶提升至阈值
-    const THRESHOLD = 5000
+    // 规则：高伤(≥5400)→混子 | 低伤(<5400)→大c/群猎/太阳奶提升至阈值
+    const THRESHOLD = 5400
 
     // 构建按角色分配的资源池
     const allC = this.step1_sortC()
@@ -403,7 +403,7 @@ export class ColumnBalancer {
       const emptySlots = this.names.filter(n => !row[`${n}_val`] || row[`${n}_val`] === '')
 
       if (baseDmg >= THRESHOLD) {
-        // ═══ 高伤（≥5000）→ 填混子 → 太阳奶 → 小c（节约大c给低伤行）═══
+        // ═══ 高伤（≥5400）→ 填混子 → 太阳奶 → 小c（节约大c给低伤行）═══
         for (const slot of emptySlots) {
           const pool = pools[slot]
           if (!pool) continue
@@ -425,7 +425,7 @@ export class ColumnBalancer {
           }
         }
       } else {
-        // ═══ 低伤（<5000）→ 使用群猎/c/太阳奶提升至阈值 ═══
+        // ═══ 低伤（<5400）→ 使用群猎/c/太阳奶提升至阈值 ═══
         let reached = false
 
         // 步骤 A：单填充（群猎 → c → 太阳奶）
@@ -445,7 +445,7 @@ export class ColumnBalancer {
             row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
           }
 
-          // A2: c（从最小到最大找第一个≥5000的c）
+          // A2: c（从最小到最大找第一个≥5400的c）
           if (!reached && pool.c.length > 0) {
             const largest = pool.c[pool.c.length - 1]
             row[`${slot}_val`] = largest.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = largest.type || ''
@@ -499,16 +499,16 @@ export class ColumnBalancer {
             }
           }
 
-          // ── 双c收紧：两c都填了且总伤>5500，从池中换更小的c ──
+          // ── 双c收紧：两c都填了且总伤>5400，从池中换更小的c ──
           const cSlots = this.names.filter(n =>
             row[`${n}_color`] === 'fill' && typeof row[`${n}_val`] === 'number')
           if (cSlots.length >= 2) {
             const curTot = this._calcRow(row).total
-            if (curTot > 5500) {
+            if (curTot > 5400) {
               for (const cs of cSlots) {
                 const pool = pools[cs]
                 const curVal = row[`${cs}_val`]
-                // 在池中找更小的c：从最小到最大试，第一个能让总伤≥5000的就是最优
+                // 在池中找更小的c：从最小到最大试，第一个能让总伤≥5400的就是最优
                 for (let ci = 0; ci < pool.c.length; ci++) {
                   const smaller = pool.c[ci]
                   if (smaller.val >= curVal) break // 池中c已不小于当前值
@@ -529,12 +529,12 @@ export class ColumnBalancer {
           continue
         }
 
-        // 步骤 B：单填充不达标 → 双填充（c从最小试，找第一个达5000的c）
+        // 步骤 B：单填充不达标 → 双填充（c从最小试，找第一个达5400的c）
         const _findMinC = (pool, row, slot, comboFn) => {
           for (let ci = 0; ci < pool.c.length; ci++) {
             const cItem = pool.c[ci]
             row[`${slot}_val`] = cItem.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = cItem.type || ''
-            if (comboFn ? comboFn() : (this._calcRow(row).total >= 5000)) {
+            if (comboFn ? comboFn() : (this._calcRow(row).total >= 5400)) {
               return ci
             }
             row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
@@ -736,7 +736,7 @@ export class ColumnBalancer {
       rows,
       meta: {
         total: 24,
-        order: '从前往后填充 | 阈值≥5000→混子(优先)/c | <5000→群猎/太阳奶/c(单填)→双填 | 大c配小奶',
+        order: '从前往后填充 | 阈值≥5400→混子(优先)/c | <5400→群猎/太阳奶/c(单填)→双填 | 大c配小奶',
       },
       remaining,
     }
