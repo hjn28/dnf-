@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node src/utils.js && vue-tsc && vite build",
+    "build": "node src/generate-data.js && vue-tsc && vite build",
     "preview": "vite preview",
-    "generate": "node src/utils.js"
+    "generate": "node src/generate-data.js"
   },
   "dependencies": {
     "vue": "^3.4.21",

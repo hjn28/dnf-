@@ -125,7 +125,9 @@
 
 <script setup lang="ts">
 import { DataAnalysis } from '@element-plus/icons-vue'
-import 表格数据 from '@/dataJson/表格数据.json'
+import { ColumnBalancer } from '@/utils'
+import 角色数据 from '@/dataJson/角色.json'
+import 倍率数据 from '@/dataJson/奶的倍率.json'
 
 interface TableRow {
   [key: string]: number | string
@@ -133,13 +135,11 @@ interface TableRow {
   segment: string
 }
 
-const data = 表格数据 as {
-  rows: TableRow[]
-  meta: { total: number; cCount: number; hunCount: number; naiCount: number; order: string }
-}
+// 实例化列平衡计算器
+const balancer = new ColumnBalancer(角色数据, 倍率数据)
+const { rows, meta, remaining } = balancer.build()
 
-const tableData = data.rows
-const meta = data.meta
+const tableData = rows as TableRow[]
 const characterOrder = ['三年', '淘气', '起源', '老王']
 
 </script>
