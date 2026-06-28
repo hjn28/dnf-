@@ -666,6 +666,67 @@ export class ColumnBalancer {
       delete row._index
     }
 
+    // ── 后处理：最低伤害行尝试与同行列主c/奶交换，提升达标率 ──
+    const low3 = rows.map((r, i) => ({ idx: i, dmg: r.total })).sort((a, b) => a.dmg - b.dmg).slice(0, 3)
+    for (const { idx: li } of low3) {
+      const lRow = rows[li]
+      for (const role of this.names) {
+        // 只处理低行中作为主c的列
+        if (lRow[`${role}_color`] !== 'c') continue
+        const lcVal = lRow[`${role}_val`]
+
+        // ── 找同角色主c的其他行，尝试交换c ──
+        for (let ri = 0; ri < rows.length; ri++) {
+          if (ri === li) continue
+          const rRow = rows[ri]
+          if (rRow[`${role}_color`] !== 'c') continue
+          const rcVal = rRow[`${role}_val`]
+          if (rcVal <= lcVal) continue // 只取更大的c给低行
+
+          // 试交换
+          lRow[`${role}_val`] = rcVal; rRow[`${role}_val`] = lcVal
+          const lt = this._calcRow(lRow).total
+          const rt = this._calcRow(rRow).total
+          if (lt >= THRESHOLD && rt >= THRESHOLD && lt > lRow.total) {
+            // 交换成功
+            Object.assign(lRow, this._calcRow(lRow))
+            Object.assign(rRow, this._calcRow(rRow))
+            break // 换完就去处理下一个低行
+          }
+          // 回退
+          lRow[`${role}_val`] = lcVal; rRow[`${role}_val`] = rcVal
+        }
+
+        // ── c交换没提升→试交换同列的奶 ──
+        if (lRow[`${role}_color`] === 'c') { // 仍为c表示没被换过
+          // 找出本行对应的奶列
+          const naiRole = this.names.find(n => lRow[`${n}_color`] === 'nai')
+          if (!naiRole) continue
+          const lnVal = lRow[`${naiRole}_val`]
+
+          for (let ri = 0; ri < rows.length; ri++) {
+            if (ri === li) continue
+            const rRow = rows[ri]
+            if (rRow[`${naiRole}_color`] !== 'nai') continue
+            const rnVal = rRow[`${naiRole}_val`]
+            // 奶值按rate比较，只换rate更高的给低行
+            if (this._rate(rnVal) <= this._rate(lnVal)) continue
+
+            lRow[`${naiRole}_val`] = rnVal; rRow[`${naiRole}_val`] = lnVal
+            const lt = this._calcRow(lRow).total
+            const rt = this._calcRow(rRow).total
+            if (lt >= THRESHOLD && rt >= THRESHOLD && lt > lRow.total) {
+              Object.assign(lRow, this._calcRow(lRow))
+              Object.assign(rRow, this._calcRow(rRow))
+              break
+            }
+            lRow[`${naiRole}_val`] = lnVal; rRow[`${naiRole}_val`] = rnVal
+          }
+        }
+        break // 处理完一个低行的主c列就换下一低行
+      }
+    }
+
     // 标记伤害最低的3行（用于前端标色）
     const dmgOrder = rows.map((r, i) => ({ idx: i, dmg: r.total })).sort((a, b) => a.dmg - b.dmg)
     for (let i = 0; i < rows.length; i++) rows[i]._lowest3 = false

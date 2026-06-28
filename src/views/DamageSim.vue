@@ -74,7 +74,7 @@
         <!-- 中间：数据表格 -->
         <div class="table-area">
           <el-card shadow="hover">
-            <template #header>
+            <!-- <template #header>
               <div class="card-header">
                 <span><el-icon><DataAnalysis /></el-icon> 角色数据明细</span>
                 <div class="header-info">
@@ -82,7 +82,7 @@
                   <el-tag size="small" type="primary">c有效 × 奶rate ÷ 1000</el-tag>
                 </div>
               </div>
-            </template>
+            </template> -->
 
             <el-table
               :data="tableData"
@@ -90,7 +90,6 @@
               stripe
               size="small"
               class="data-table"
-              max-height="700"
             >
               <el-table-column label="#" type="index" width="40" align="center" fixed />
 
@@ -110,7 +109,7 @@
 
               <el-table-column label="伤害（千亿）" width="130" align="right" sortable prop="total" fixed="right">
                 <template #default="{ row }">
-                  <span class="cell-total" :class="{ 'total-zero': row.total === 0 }">
+                  <span class="cell-total" :class="{ 'total-zero': row.total === 0, 'cell-lowest': row._lowest3 }" >
                     {{ row.total > 0 ? row.total.toLocaleString() : '—' }}
                   </span>
                 </template>
@@ -183,13 +182,14 @@ const characterOrder = ['三年', '淘气', '起源', '老王']
 .data-val { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
 .color-fill { color: #909399; }
 .data-table :deep(.el-table__body td) { padding: 4px 2px !important; }
-.color-c { color: var(--el-color-primary); font-size: 15px; font-weight: 800; }
+.color-c { color: var(--el-color-danger); font-size: 15px; font-weight: 800; }
+.cell-lowest { background-color: #fde8e8; padding: 2px 6px; border-radius: 4px; }
 .color-nai { color: #d4890a; }
 .color-nai-m { color: var(--el-color-danger); font-weight: 700; }
 .color-qun { color: var(--el-color-success); }
 .color-hun { color: #8b5cf6; }
 .val-empty { color: var(--el-text-color-placeholder); font-weight: 400; }
 
-.cell-total { font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: var(--el-color-danger); }
+.cell-total { font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: var(--el-text-color-secondary); }
 .total-zero { color: var(--el-text-color-placeholder); font-weight: 400; }
 </style>
