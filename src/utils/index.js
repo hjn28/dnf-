@@ -428,13 +428,13 @@ export class ColumnBalancer {
         // ═══ 低伤（<5000）→ 使用群猎/c/太阳奶提升至阈值 ═══
         let reached = false
 
-        // 步骤 A：单填充（群猎 → c → 太阳奶，c优先于太阳奶节约资源）
+        // 步骤 A：单填充（群猎 → c → 太阳奶）
         for (const slot of emptySlots) {
           if (reached) break
           const pool = pools[slot]
           if (!pool) continue
 
-          // A1: 群猎（×1.12 加成主c）
+          // A1: 群猎
           if (pool.qunlie.length > 0) {
             row[`${slot}_val`] = pool.qunlie[0]
             row[`${slot}_color`] = 'fill'
@@ -445,41 +445,31 @@ export class ColumnBalancer {
             row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
           }
 
-          // A2: c（先试最大c能否≥4800 → 找最小达标c，节约大c）
-          if (pool.c.length > 0) {
-            // 先试最大c，看是否能≥4800
+          // A2: c（从最小到最大找第一个≥5000的c，直接消耗）
+          if (!reached && pool.c.length > 0) {
             const largest = pool.c[pool.c.length - 1]
-            row[`${slot}_val`] = largest.val
-            row[`${slot}_color`] = 'fill'
-            row[`${slot}_type`] = largest.type || ''
+            row[`${slot}_val`] = largest.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = largest.type || ''
             const maxDmg = this._calcRow(row).total
             row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
 
-            if (maxDmg >= 4800) {
-              // c能起作用 → 从最小到最大找第一个≥4800的c
+            if (maxDmg >= THRESHOLD) {
               let useIdx = -1
               for (let ci = 0; ci < pool.c.length; ci++) {
                 const cItem = pool.c[ci]
-                row[`${slot}_val`] = cItem.val
-                row[`${slot}_color`] = 'fill'
-                row[`${slot}_type`] = cItem.type || ''
-                if (this._calcRow(row).total >= 4800) {
-                  useIdx = ci; break
-                }
+                row[`${slot}_val`] = cItem.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = cItem.type || ''
+                if (this._calcRow(row).total >= THRESHOLD) { useIdx = ci; break }
                 row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
               }
               if (useIdx >= 0) {
                 const chosen = pool.c.splice(useIdx, 1)[0]
-                row[`${slot}_val`] = chosen.val
-                row[`${slot}_color`] = 'fill'
-                row[`${slot}_type`] = chosen.type || ''
+                row[`${slot}_val`] = chosen.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = chosen.type || ''
                 reached = true; break
               }
             }
           }
 
-          // A3: 太阳奶（总伤害×1.24，排在c后面节约太阳奶）
-          if (pool.nai.length > 0) {
+          // A3: 太阳奶
+          if (!reached && pool.nai.length > 0) {
             row[`${slot}_val`] = pool.nai[0].val
             row[`${slot}_color`] = 'fill'
             row[`${slot}_type`] = ''
@@ -500,7 +490,6 @@ export class ColumnBalancer {
               row[`${slot}_val`] = pool.hun.shift()
               row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = ''
             } else if (pool.nai.length > 0) {
-              // 太阳奶优先于c（节省c给更需要的行）
               row[`${slot}_val`] = pool.nai.shift().val
               row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = '太阳奶'
             } else if (pool.c.length > 0) {
@@ -512,12 +501,12 @@ export class ColumnBalancer {
           continue
         }
 
-        // 步骤 B：单填充不达标 → 双填充（c从最小试，找第一个达4800的c）
+        // 步骤 B：单填充不达标 → 双填充（c从最小试，找第一个达5000的c）
         const _findMinC = (pool, row, slot, comboFn) => {
           for (let ci = 0; ci < pool.c.length; ci++) {
             const cItem = pool.c[ci]
             row[`${slot}_val`] = cItem.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = cItem.type || ''
-            if (comboFn ? comboFn() : (this._calcRow(row).total >= 4800)) {
+            if (comboFn ? comboFn() : (this._calcRow(row).total >= 5000)) {
               return ci
             }
             row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
@@ -571,21 +560,27 @@ export class ColumnBalancer {
               row[`${sB}_val`] = ''; row[`${sB}_color`] = ''
             }
 
-            // B5: c + c（固定cA取最小，cB从最小到最大试，找刚刚≥4800的）
+            // B5: c + c（cA从最小，cB从最小，双向优化找第一个≥4800的组合）
             if (!reached && pA.c.length > 0 && pB.c.length > 0) {
-              const cA = pA.c[0]
-              row[`${sA}_val`] = cA.val; row[`${sA}_color`] = 'fill'; row[`${sA}_type`] = cA.type || ''
-              let bIdx = -1
-              for (let ci = 0; ci < pB.c.length; ci++) {
-                const cB = pB.c[ci]
-                row[`${sB}_val`] = cB.val; row[`${sB}_color`] = 'fill'; row[`${sB}_type`] = cB.type || ''
-                if (this._calcRow(row).total >= 4800) { bIdx = ci; break }
-                row[`${sB}_val`] = ''; row[`${sB}_color`] = ''; row[`${sB}_type`] = ''
+              let bestAI = -1, bestBI = -1
+              for (let ai = 0; ai < pA.c.length && bestAI < 0; ai++) {
+                const cA = pA.c[ai]
+                row[`${sA}_val`] = cA.val; row[`${sA}_color`] = 'fill'; row[`${sA}_type`] = cA.type || ''
+                for (let bi = 0; bi < pB.c.length && bestAI < 0; bi++) {
+                  const cB = pB.c[bi]
+                  row[`${sB}_val`] = cB.val; row[`${sB}_color`] = 'fill'; row[`${sB}_type`] = cB.type || ''
+                  if (this._calcRow(row).total >= 4800) { bestAI = ai; bestBI = bi }
+                  row[`${sB}_val`] = ''; row[`${sB}_color`] = ''; row[`${sB}_type`] = ''
+                }
+                row[`${sA}_val`] = ''; row[`${sA}_color`] = ''; row[`${sA}_type`] = ''
               }
-              if (bIdx >= 0) {
-                pA.c.shift(); pB.c.splice(bIdx, 1); reached = true; break
+              if (bestAI >= 0) {
+                const chosenA = pA.c.splice(bestAI, 1)[0]
+                const chosenB = pB.c.splice(bestBI, 1)[0]
+                row[`${sA}_val`] = chosenA.val; row[`${sA}_color`] = 'fill'; row[`${sA}_type`] = chosenA.type || ''
+                row[`${sB}_val`] = chosenB.val; row[`${sB}_color`] = 'fill'; row[`${sB}_type`] = chosenB.type || ''
+                reached = true; break
               }
-              row[`${sA}_val`] = ''; row[`${sA}_color`] = ''; row[`${sA}_type`] = ''
             }
           }
           if (reached) break
@@ -642,6 +637,11 @@ export class ColumnBalancer {
       row.total = result.total
       delete row._index
     }
+
+    // 标记伤害最低的3行（用于前端标色）
+    const dmgOrder = rows.map((r, i) => ({ idx: i, dmg: r.total })).sort((a, b) => a.dmg - b.dmg)
+    for (let i = 0; i < rows.length; i++) rows[i]._lowest3 = false
+    for (let k = 0; k < Math.min(3, dmgOrder.length); k++) rows[dmgOrder[k].idx]._lowest3 = true
 
     return {
       rows,
