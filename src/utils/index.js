@@ -143,27 +143,70 @@ export class ColumnBalancer {
   _pair(cList, naiList) {
     const pairs = []
     const used = new Set()
+    // 冲突延迟队列：当前行 c 与 奶 同列时，c 优先，奶推迟到下一行
+    const deferred = []
 
     for (let i = 0; i < cList.length; i++) {
-      let idx = i
-      // 跳过同名列或已使用的奶
-      while (idx < naiList.length && (used.has(idx) || cList[i].name === naiList[idx].name)) {
-        idx++
-      }
-      // 超出范围则从头开始找
-      if (idx >= naiList.length) {
-        idx = 0
-        while (used.has(idx) || cList[i].name === naiList[idx].name) {
-          idx++
+      const c = cList[i]
+      let nai = null
+
+      // 1. 优先从延迟队列中取不冲突的奶
+      for (let d = 0; d < deferred.length; d++) {
+        if (deferred[d].name !== c.name) {
+          nai = deferred.splice(d, 1)[0]
+          break
         }
       }
-      used.add(idx)
+
+      // 2. 还没找到，从 naiList 中顺序配对
+      if (!nai) {
+        let idx = i
+        // 跳过已使用的奶
+        while (idx < naiList.length && used.has(idx)) {
+          idx++
+        }
+
+        if (idx < naiList.length) {
+          if (c.name !== naiList[idx].name) {
+            // 不冲突，直接配对
+            nai = naiList[idx]
+            used.add(idx)
+          } else {
+            // 冲突：c 优先，奶延迟到下一行
+            deferred.push(naiList[idx])
+            used.add(idx)
+            // 为当前 c 继续找下一个可用的奶
+            idx++
+            while (idx < naiList.length && (used.has(idx) || c.name === naiList[idx].name)) {
+              idx++
+            }
+            if (idx < naiList.length) {
+              nai = naiList[idx]
+              used.add(idx)
+            }
+          }
+        }
+
+        // 3. 当前范围没找到，从头搜索
+        if (!nai) {
+          let idx = 0
+          while (idx < naiList.length && (used.has(idx) || c.name === naiList[idx].name)) {
+            idx++
+          }
+          if (idx < naiList.length) {
+            nai = naiList[idx]
+            used.add(idx)
+          }
+        }
+      }
+
       pairs.push({
-        c: cList[i],
-        nai: naiList[idx],
-        baseDmg: this._calcBaseDmg(cList[i], naiList[idx]),
+        c,
+        nai: nai || { name: '', val: '' },
+        baseDmg: nai ? this._calcBaseDmg(c, nai) : 0,
       })
     }
+
     return pairs
   }
 
