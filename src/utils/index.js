@@ -241,7 +241,7 @@ export class ColumnBalancer {
         return v
       })
     }
-
+    console.log('[ColumnBalancer] 剩余值统计:', { remainC, remainNai, hun })
     return { c: remainC, nai: remainNai, hun }
   }
 
@@ -254,6 +254,59 @@ export class ColumnBalancer {
       }
     }
     return items.sort((a, b) => this._num(b.val) - this._num(a.val))
+  }
+
+  // ==================== 行伤害计算 ====================
+
+  /**
+   * 计算行总伤害
+   *
+   * 规则：
+   *   - c（主列 color='c'）：若行内有群猎则 ×1.12
+   *   - c（填充列 color='fill'）：不加成，直接累加
+   *   - 奶（主列 color='nai'）：取倍率
+   *   - 主奶带 m 后缀（如 "4.31m"）：总伤害 ×1.24（太阳奶效果）
+   *   - 填充太阳奶（数值字符串）：总伤害 ×1.24，仅一次且 maxC<4000
+   */
+  _calcRow(row) {
+    const hasQunlie = Object.values(row).some(v => v === '群猎')
+    let cSum = 0, mainRate = 0, maxC = 0
+    let sunMultiplier = 1.0
+
+    for (const n of this.names) {
+      const v = row[`${n}_val`], c = row[`${n}_color`]
+      if (typeof v === 'number') {
+        const add = c === 'c' && hasQunlie ? Math.round(v * 1.12) : v
+        cSum += add
+        if (c === 'c') maxC = add
+      }
+      if (c === 'nai') {
+        mainRate = this._rate(v)
+        // 主奶带m后缀 → 太阳奶，总伤害×1.24
+        if (String(v).endsWith('m')) {
+          sunMultiplier *= 1.24
+        }
+      }
+    }
+
+    // 填充太阳奶（数值字符串）→ 总伤害×1.24，仅一次且maxC<4000
+    for (const n of this.names) {
+      const v = row[`${n}_val`], c = row[`${n}_color`]
+      if (c === 'fill' && typeof v === 'string' && /^[\d.]+m?$/.test(v) && maxC < 4000) {
+        sunMultiplier *= 1.24
+        break
+      }
+    }
+
+    const baseTotal = Math.round(cSum * mainRate / 1000)
+    const total = Math.round(baseTotal * sunMultiplier)
+
+    return {
+      cSum,
+      totalRate: mainRate,
+      total,
+      sunMultiplier,
+    }
   }
 
   // ==================== 构建 ====================
@@ -306,12 +359,8 @@ export class ColumnBalancer {
       row[`${p.nai.name}_val`] = p.nai.val
       row[`${p.nai.name}_color`] = 'nai'
 
-      // 伤害计算
-      const ce = p.c.type === '群猎' ? Math.round(p.c.val * 1.12) : p.c.val
-      const rate = this._rate(p.nai.val)
-      row.cSum = ce
-      row.rate = rate
-      row.total = Math.round(ce * rate / 1000)
+      // 伤害计算（使用_calcRow统一逻辑，含主奶m后缀×1.24）
+      Object.assign(row, this._calcRow(row))
 
       return row
     })
@@ -325,11 +374,280 @@ export class ColumnBalancer {
     // 剩余值暂存
     const remaining = this.gatherOthers(24, 24)
 
+    // ==================== 填充逻辑 ====================
+    // 规则：高伤(≥5000)→混子 | 低伤(<5000)→大c/群猎/太阳奶提升至阈值
+    const THRESHOLD = 5000
+
+    // 构建按角色分配的资源池
+    const allC = this.step1_sortC()
+    const allNaiDesc = this._allNaiDesc()
+    const remainC = allC.slice(24)
+    const remainNai = allNaiDesc.slice(24)
+
+    const pools = {}
+    for (const n of this.names) {
+      pools[n] = {
+        c:      remainC.filter(item => item.name === n).sort((a, b) => a.val - b.val), // 从小到大
+        nai:    remainNai.filter(item => item.name === n),                              // 太阳奶
+        qunlie: (this.roles[n]?.其它 || []).filter(v => v === '群猎' || v === '+'),
+        hun:    (this.roles[n]?.其它 || []).filter(v => v === '混子' || v === 'x'),
+      }
+    }
+
+    // 按原始顺序处理（c从大到小 → "从前往后"）
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx]
+      const baseDmg = row.total
+
+      // 找出该行的空位
+      const emptySlots = this.names.filter(n => !row[`${n}_val`] || row[`${n}_val`] === '')
+
+      if (baseDmg >= THRESHOLD) {
+        // ═══ 高伤（≥5000）→ 填混子 → 太阳奶 → 小c（节约大c给低伤行）═══
+        for (const slot of emptySlots) {
+          const pool = pools[slot]
+          if (!pool) continue
+          if (pool.hun.length > 0) {
+            row[`${slot}_val`] = pool.hun.shift()
+            row[`${slot}_color`] = 'fill'
+            row[`${slot}_type`] = ''
+          } else if (pool.nai.length > 0) {
+            // 太阳奶优先于大c（太阳奶是百分比加成，不消耗c资源）
+            row[`${slot}_val`] = pool.nai.shift().val
+            row[`${slot}_color`] = 'fill'
+            row[`${slot}_type`] = '太阳奶'
+          } else if (pool.c.length > 0) {
+            // 混子/太阳奶都不够 → 取最小c
+            const c = pool.c.shift()
+            row[`${slot}_val`] = c.val
+            row[`${slot}_color`] = 'fill'
+            row[`${slot}_type`] = c.type || ''
+          }
+        }
+      } else {
+        // ═══ 低伤（<5000）→ 使用群猎/c/太阳奶提升至阈值 ═══
+        let reached = false
+
+        // 步骤 A：单填充（群猎 → c → 太阳奶，c优先于太阳奶节约资源）
+        for (const slot of emptySlots) {
+          if (reached) break
+          const pool = pools[slot]
+          if (!pool) continue
+
+          // A1: 群猎（×1.12 加成主c）
+          if (pool.qunlie.length > 0) {
+            row[`${slot}_val`] = pool.qunlie[0]
+            row[`${slot}_color`] = 'fill'
+            row[`${slot}_type`] = '群猎'
+            if (this._calcRow(row).total >= THRESHOLD) {
+              pool.qunlie.shift(); reached = true; break
+            }
+            row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
+          }
+
+          // A2: c（先试最大c能否≥4800 → 找最小达标c，节约大c）
+          if (pool.c.length > 0) {
+            // 先试最大c，看是否能≥4800
+            const largest = pool.c[pool.c.length - 1]
+            row[`${slot}_val`] = largest.val
+            row[`${slot}_color`] = 'fill'
+            row[`${slot}_type`] = largest.type || ''
+            const maxDmg = this._calcRow(row).total
+            row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
+
+            if (maxDmg >= 4800) {
+              // c能起作用 → 从最小到最大找第一个≥4800的c
+              let useIdx = -1
+              for (let ci = 0; ci < pool.c.length; ci++) {
+                const cItem = pool.c[ci]
+                row[`${slot}_val`] = cItem.val
+                row[`${slot}_color`] = 'fill'
+                row[`${slot}_type`] = cItem.type || ''
+                if (this._calcRow(row).total >= 4800) {
+                  useIdx = ci; break
+                }
+                row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
+              }
+              if (useIdx >= 0) {
+                const chosen = pool.c.splice(useIdx, 1)[0]
+                row[`${slot}_val`] = chosen.val
+                row[`${slot}_color`] = 'fill'
+                row[`${slot}_type`] = chosen.type || ''
+                reached = true; break
+              }
+            }
+          }
+
+          // A3: 太阳奶（总伤害×1.24，排在c后面节约太阳奶）
+          if (pool.nai.length > 0) {
+            row[`${slot}_val`] = pool.nai[0].val
+            row[`${slot}_color`] = 'fill'
+            row[`${slot}_type`] = ''
+            if (this._calcRow(row).total >= THRESHOLD) {
+              pool.nai.shift(); reached = true; break
+            }
+            row[`${slot}_val`] = ''; row[`${slot}_color`] = ''
+          }
+        }
+
+        if (reached) {
+          // 单填充达标 → 剩余空位填混子 → 太阳奶 → 最小c
+          for (const slot of emptySlots) {
+            if (row[`${slot}_val`] && row[`${slot}_val`] !== '') continue
+            const pool = pools[slot]
+            if (!pool) continue
+            if (pool.hun.length > 0) {
+              row[`${slot}_val`] = pool.hun.shift()
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = ''
+            } else if (pool.nai.length > 0) {
+              // 太阳奶优先于c（节省c给更需要的行）
+              row[`${slot}_val`] = pool.nai.shift().val
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = '太阳奶'
+            } else if (pool.c.length > 0) {
+              const c = pool.c.shift()
+              row[`${slot}_val`] = c.val
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = c.type || ''
+            }
+          }
+          continue
+        }
+
+        // 步骤 B：单填充不达标 → 双填充（c从最小试，找第一个达4800的c）
+        const _findMinC = (pool, row, slot, comboFn) => {
+          for (let ci = 0; ci < pool.c.length; ci++) {
+            const cItem = pool.c[ci]
+            row[`${slot}_val`] = cItem.val; row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = cItem.type || ''
+            if (comboFn ? comboFn() : (this._calcRow(row).total >= 4800)) {
+              return ci
+            }
+            row[`${slot}_val`] = ''; row[`${slot}_color`] = ''; row[`${slot}_type`] = ''
+          }
+          return -1
+        }
+
+        for (let i = 0; i < emptySlots.length && !reached; i++) {
+          for (let j = i + 1; j < emptySlots.length && !reached; j++) {
+            const sA = emptySlots[i], sB = emptySlots[j]
+            const pA = pools[sA], pB = pools[sB]
+            if (!pA || !pB) continue
+
+            // B1: 群猎 + c（找最小达标c）
+            if (pA.qunlie.length > 0 && pB.c.length > 0) {
+              row[`${sA}_val`] = pA.qunlie[0]; row[`${sA}_color`] = 'fill'; row[`${sA}_type`] = '群猎'
+              const ci = _findMinC(pB, row, sB)
+              if (ci >= 0) {
+                pA.qunlie.shift(); pB.c.splice(ci, 1)[0]; reached = true; break
+              }
+              row[`${sA}_val`] = ''; row[`${sA}_color`] = ''; row[`${sA}_type`] = ''
+            }
+
+            // B2: c + 群猎
+            if (!reached && pA.c.length > 0 && pB.qunlie.length > 0) {
+              row[`${sB}_val`] = pB.qunlie[0]; row[`${sB}_color`] = 'fill'; row[`${sB}_type`] = '群猎'
+              const ci = _findMinC(pA, row, sA)
+              if (ci >= 0) {
+                pA.c.splice(ci, 1); pB.qunlie.shift(); reached = true; break
+              }
+              row[`${sB}_val`] = ''; row[`${sB}_color`] = ''; row[`${sB}_type`] = ''
+            }
+
+            // B3: 太阳奶 + c
+            if (!reached && pA.nai.length > 0 && pB.c.length > 0) {
+              row[`${sA}_val`] = pA.nai[0].val; row[`${sA}_color`] = 'fill'; row[`${sA}_type`] = ''
+              const ci = _findMinC(pB, row, sB)
+              if (ci >= 0) {
+                pA.nai.shift(); pB.c.splice(ci, 1); reached = true; break
+              }
+              row[`${sA}_val`] = ''; row[`${sA}_color`] = ''
+            }
+
+            // B4: c + 太阳奶
+            if (!reached && pA.c.length > 0 && pB.nai.length > 0) {
+              row[`${sB}_val`] = pB.nai[0].val; row[`${sB}_color`] = 'fill'; row[`${sB}_type`] = ''
+              const ci = _findMinC(pA, row, sA)
+              if (ci >= 0) {
+                pA.c.splice(ci, 1); pB.nai.shift(); reached = true; break
+              }
+              row[`${sB}_val`] = ''; row[`${sB}_color`] = ''
+            }
+
+            // B5: c + c（固定cA取最小，cB从最小到最大试，找刚刚≥4800的）
+            if (!reached && pA.c.length > 0 && pB.c.length > 0) {
+              const cA = pA.c[0]
+              row[`${sA}_val`] = cA.val; row[`${sA}_color`] = 'fill'; row[`${sA}_type`] = cA.type || ''
+              let bIdx = -1
+              for (let ci = 0; ci < pB.c.length; ci++) {
+                const cB = pB.c[ci]
+                row[`${sB}_val`] = cB.val; row[`${sB}_color`] = 'fill'; row[`${sB}_type`] = cB.type || ''
+                if (this._calcRow(row).total >= 4800) { bIdx = ci; break }
+                row[`${sB}_val`] = ''; row[`${sB}_color`] = ''; row[`${sB}_type`] = ''
+              }
+              if (bIdx >= 0) {
+                pA.c.shift(); pB.c.splice(bIdx, 1); reached = true; break
+              }
+              row[`${sA}_val`] = ''; row[`${sA}_color`] = ''; row[`${sA}_type`] = ''
+            }
+          }
+          if (reached) break
+        }
+
+        if (reached) {
+          // 双填充达标 → 剩余空位填混子 → 太阳奶 → 最小c
+          for (const slot of emptySlots) {
+            if (row[`${slot}_val`] && row[`${slot}_val`] !== '') continue
+            const pool = pools[slot]
+            if (!pool) continue
+            if (pool.hun.length > 0) {
+              row[`${slot}_val`] = pool.hun.shift()
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = ''
+            } else if (pool.nai.length > 0) {
+              row[`${slot}_val`] = pool.nai.shift().val
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = '太阳奶'
+            } else if (pool.c.length > 0) {
+              const c = pool.c.shift()
+              row[`${slot}_val`] = c.val
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = c.type || ''
+            }
+          }
+        } else {
+          // 所有尝试失败 → 耗尽资源填满
+          for (const slot of emptySlots) {
+            if (row[`${slot}_val`] && row[`${slot}_val`] !== '') continue
+            const pool = pools[slot]
+            if (!pool) continue
+            if (pool.qunlie.length > 0) {
+              row[`${slot}_val`] = pool.qunlie.shift()
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = '群猎'
+            } else if (pool.nai.length > 0) {
+              row[`${slot}_val`] = pool.nai.shift().val
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = ''
+            } else if (pool.c.length > 0) {
+              const c = pool.c.shift() // 取最小c，节约大c
+              row[`${slot}_val`] = c.val
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = c.type || ''
+            } else if (pool.hun.length > 0) {
+              row[`${slot}_val`] = pool.hun.shift()
+              row[`${slot}_color`] = 'fill'; row[`${slot}_type`] = ''
+            }
+          }
+        }
+      }
+    }
+
+    // 重算最终伤害
+    for (const row of rows) {
+      const result = this._calcRow(row)
+      row.cSum = result.cSum
+      row.rate = result.totalRate
+      row.total = result.total
+      delete row._index
+    }
+
     return {
       rows,
       meta: {
         total: 24,
-        order: '大c配小奶 | c降序(步骤1) → 奶从大到小选→升序排(步骤2) | 不跨列(规则)',
+        order: '从前往后填充 | 阈值≥5000→混子(优先)/c | <5000→群猎/太阳奶/c(单填)→双填 | 大c配小奶',
       },
       remaining,
     }
